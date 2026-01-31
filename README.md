@@ -1,10 +1,10 @@
 # Worm
 
 <div align="center" style="padding-top: 50px">
-<img src="/Resources/Worm.png" />
+<img src="/Resources/Worm.jpg" />
     <br>
     <br>
-    <b><i>Uci chess engine 2400 elo.</i></b>
+    <b><i>Small uci chess engine 24r0 elo.</i></b>
     <br>
     <br>
     <img src="https://img.shields.io/github/downloads/Thibor/Worm/total?color=critical&style=for-the-badge">
