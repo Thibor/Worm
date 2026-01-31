@@ -9,8 +9,8 @@
 #include <windows.h>
 #endif
 
-#define NAME "StoneChess"
-#define VERSION "2025-09-30"
+#define NAME "Worm"
+#define VERSION "2026-01-30"
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 
