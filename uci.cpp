@@ -127,21 +127,23 @@ static void UciBench() {
 		elapsed = GetTimeMs() - info.timeStart;
 		printf(" %2d. %8llu %12llu\n", info.depthLimit, elapsed, info.nodes);
 	}
-	PrintSummary(GetTimeMs() - info.timeStart, info.nodes);
+	PrintSummary(elapsed, info.nodes);
 }
 
 //start performance test
 static void UciPerformance(){
 	ResetInfo();
 	PrintPerformanceHeader();
-	info.depthLimit = 0;
 	pos.SetFen();
-	while (GetTimeMs() - info.timeStart < 3000)
+	info.depthLimit = 0;
+	S64 elapsed = 0;
+	while (elapsed < 3000)
 	{
 		PerftDriver(info.depthLimit++);
-		printf(" %2d. %8llu %12llu\n", info.depthLimit, GetTimeMs() - info.timeStart, info.nodes);
+		elapsed = GetTimeMs() - info.timeStart;
+		printf(" %2d. %8llu %12llu\n", info.depthLimit,elapsed, info.nodes);
 	}
-	PrintSummary(GetTimeMs() - info.timeStart, info.nodes);
+	PrintSummary(elapsed, info.nodes);
 }
 
 static void ParsePosition(string command) {
