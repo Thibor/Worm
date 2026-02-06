@@ -5,17 +5,12 @@
 #include <algorithm>
 #include <vector>
 #include <sstream> 
+
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #endif
 
-#define NAME "Worm"
-#define VERSION "2026-01-30"
-#define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
-
 using namespace std;
-
 #define U64 unsigned __int64
 #define U32 unsigned __int32
 #define U16 unsigned __int16
@@ -24,10 +19,12 @@ using namespace std;
 #define S32 signed __int32
 #define S16 signed __int16
 #define S8  signed __int8
+#define MAX_PLY 64
+#define NAME "Worm"
+#define VERSION "2026-01-30"
+#define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define Bitboard unsigned __int64
 #define Hash unsigned __int64
-
-constexpr int MAX_PLY = 100;
 #define MOVE_NONE 0
 
 enum Square : int {
@@ -496,7 +493,7 @@ public:
 	inline Move(U16 m) { move = m; }
 	inline Move(Square from, Square to) : move(0) { move = (from << 6) | to; }
 	inline Move(Square from, Square to, MoveFlags flags) : move(0) { move = (flags << 12) | (from << 6) | to; }
-	Move(const std::string& move);
+	//Move(const std::string& move);
 
 	inline Square To() const { return Square(move & 0x3f); }
 	inline Square From() const { return Square((move >> 6) & 0x3f); }
@@ -762,7 +759,7 @@ public:
 	const Move* begin() const { return list; }
 	const Move* end() const { return last; }
 	size_t size() const { return last - list; }
-	Move list[218];
+	Move list[256];
 private:
 	Move* last;
 };
@@ -770,7 +767,6 @@ private:
 struct SearchInfo {
 	bool stop = false;
 	bool post = true;
-	bool infinite = false;
 	bool ponder = false;
 	int multiPV = 1;
 	int depthLimit = DEPTH_MAX;
@@ -784,7 +780,7 @@ struct SearchInfo {
 };
 extern SearchInfo info;
 
-void CheckUp();
+bool CheckUp();
 Value Eval();
 Value Eval(Move m);
 void InitEval();
@@ -796,7 +792,6 @@ void SplitString(const std::string& txt, std::vector<std::string>& vStr, char ch
 string thousandSeparator(uint64_t n);
 string Trim(const string& s);
 string StrToLower(std::string s);
-bool GetInput(std::string& s);
 int InitImput();
 void PrintSummary(U64 time, U64 nodes);
 void ResetInfo();

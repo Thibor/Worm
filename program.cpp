@@ -548,7 +548,7 @@ string StrToLower(string s) {
 	return s;
 }
 
-Move::Move(const std::string& move) {
+/*Move::Move(const std::string& move) {
 	Square fr = CreateSquare(File(move[0] - 'a'), Rank(move[1] - '1'));
 	Square to = CreateSquare(File(move[2] - 'a'), Rank(move[3] - '1'));
 	MoveFlags mf = MoveFlags::QUIET;
@@ -562,7 +562,7 @@ Move::Move(const std::string& move) {
 		else if (move[4] == 'n')
 			mf = MoveFlags::PC_KNIGHT;
 	this->move = (mf << 12) | (fr << 6) | to;
-}
+}*/
 
 string Move::ToUci() const {
 	string uci = SQSTR[From()] + SQSTR[To()];
@@ -587,15 +587,6 @@ U64 GetTimeMs() {
 #endif
 }
 
-//check if we need to stop the search
-void CheckUp() {
-	string input;
-	if (GetInput(input))
-		UciCommand(input);
-	if ((info.timeLimit && GetTimeMs() - info.timeStart > info.timeLimit) || (info.nodesLimit && info.nodes > info.nodesLimit))
-		info.stop = true;
-}
-
 bool pipe;
 HANDLE hstdin;
 
@@ -617,7 +608,7 @@ int InitImput()
 	return 0;
 }
 
-static bool input() {
+static bool InputAvailable() {
 	unsigned long dw = 0;
 	if (pipe)
 		PeekNamedPipe(hstdin, 0, 0, 0, &dw, 0);
@@ -626,26 +617,20 @@ static bool input() {
 	return dw > 1;
 }
 
-char* getsafe(char* buffer, int count)
-{
-	char* result = buffer, * np;
-	if ((buffer == NULL) || (count < 1))
-		result = NULL;
-	else if (count == 1)
-		*result = '\0';
-	else if ((result = fgets(buffer, count, stdin)) != NULL)
-		if (np = strchr(buffer, '\n'))
-			*np = '\0';
-	return result;
-}
-
-bool GetInput(string& s){
-	char command[5000];
-	if (!input())
-		return false;
-	getsafe(command, sizeof command);
-	s = string(command);
-	return true;
+//check if we need to stop the search
+bool CheckUp() {
+	if (!(++info.nodes & 0xffff)) {
+		if (info.timeLimit && GetTimeMs() - info.timeStart > info.timeLimit)
+			info.stop = true;
+		if (info.nodesLimit && info.nodes > info.nodesLimit)
+			info.stop = true;
+		if (InputAvailable()) {
+			string line;
+			getline(cin, line);
+			UciCommand(line);
+		}
+	}
+	return info.stop;
 }
 
 int main() {

@@ -38,7 +38,6 @@ static void UciEval() {
 }
 
 static void UciPonderhit() {
-	info.infinite = false;
 	info.ponder = false;
 	info.post = true;
 	info.stop = false;
@@ -185,19 +184,14 @@ static void ParseGo(string command) {
 	int binc = 0;
 	int movestogo = 32;
 	while (ss >> token) {
-		if (token == "infinite")
-			info.infinite = true;
-		else if (token == "ponder") {
+		if (token == "ponder")
 			info.ponder = true;
-			info.infinite = true;
-		}
 		else if(token == "searchmoves") {
 			CMoveList list = CMoveList(pos);
-			while (ss >> token) {
+			while (ss >> token) 
 				for (Move m : list)
 					if (m.ToUci() == token)
 						info.rootMoves.push_back(m);
-			}
 		}
 		else if (token == "wtime")
 			ss >> wtime;

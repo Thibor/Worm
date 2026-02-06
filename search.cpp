@@ -165,9 +165,7 @@ static void UpdateQuietStats(Stack* ss, Move move) {
 //Quiesce search
 template <NodeType nt>
 Value SearchQuiesce(Position& pos, Stack* ss, Value alpha, Value beta) {
-	if (!(++info.nodes & 0xffff))
-		CheckUp();
-	if (info.stop)
+	if (CheckUp())
 		return VALUE_ZERO;
 	(ss + 1)->ply = ss->ply + 1;
 	Value staticEval = ss->staticEval = Eval();
@@ -258,9 +256,7 @@ static Value SearchAlpha(Position& pos, Stack* ss, Depth depth, Value alpha, Val
 		++depth;
 	if (depth < ONE_PLY)
 		return SearchQuiesce<nt>(pos, ss, alpha, beta);
-	if (!(++info.nodes & 0xffff))
-		CheckUp();
-	if (info.stop)
+	if (CheckUp())
 		return VALUE_ZERO;
 	//mate distance pruning
 	Value  mate_value = VALUE_MATE - ss->ply;
