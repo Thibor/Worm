@@ -503,66 +503,10 @@ void SplitInt(const string& txt, vector<int>& vInt, char ch) {
 	vInt.push_back(stoi(txt.substr(initialPos, min(pos, txt.size()) - initialPos + 1)));
 }
 
-// Function to put thousands
-// separators in the given integer
-string thousandSeparator(uint64_t n)
-{
-	string ans = "";
-
-	// Convert the given integer
-	// to equivalent string
-	string num = to_string(n);
-
-	// Initialise count
-	int count = 0;
-
-	// Traverse the string in reverse
-	for (int i = (int)num.size() - 1; i >= 0; i--) {
-		ans.push_back(num[i]);
-
-		// If three characters
-		// are traversed
-		if (++count == 3) {
-			ans.push_back(' ');
-			count = 0;
-		}
-	}
-
-	// Reverse the string to get
-	// the desired output
-	reverse(ans.begin(), ans.end());
-
-	// If the given string is
-	// less than 1000
-	if (ans.size() % 4 == 0) {
-
-		// Remove ','
-		ans.erase(ans.begin());
-	}
-
-	return ans;
-}
-
 string StrToLower(string s) {
 	transform(s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
 }
-
-/*Move::Move(const std::string& move) {
-	Square fr = CreateSquare(File(move[0] - 'a'), Rank(move[1] - '1'));
-	Square to = CreateSquare(File(move[2] - 'a'), Rank(move[3] - '1'));
-	MoveFlags mf = MoveFlags::QUIET;
-	if (move.length() > 4)
-		if (move[4] == 'q')
-			mf = MoveFlags::PC_QUEEN;
-		else if (move[4] == 'r')
-			mf = MoveFlags::PC_ROOK;
-		else if (move[4] == 'b')
-			mf = MoveFlags::PC_BISHOP;
-		else if (move[4] == 'n')
-			mf = MoveFlags::PC_KNIGHT;
-	this->move = (mf << 12) | (fr << 6) | to;
-}*/
 
 string Move::ToUci() const {
 	string uci = SQSTR[From()] + SQSTR[To()];
@@ -587,29 +531,24 @@ U64 GetTimeMs() {
 #endif
 }
 
-bool pipe;
-HANDLE hstdin;
-
-int InitImput()
-{
-	unsigned long dw;
-	hstdin = GetStdHandle(STD_INPUT_HANDLE);
-	pipe = !GetConsoleMode(hstdin, &dw);
-	if (!pipe)
-	{
-		SetConsoleMode(hstdin, dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT));
-		FlushConsoleInputBuffer(hstdin);
-	}
-	else
-	{
-		setvbuf(stdin, NULL, _IONBF, 0);
-		setvbuf(stdout, NULL, _IONBF, 0);
-	}
-	return 0;
-}
-
 static bool InputAvailable() {
+	static HANDLE hstdin = 0;
+	static bool pipe = false;
 	unsigned long dw = 0;
+	if (!hstdin) {
+		hstdin = GetStdHandle(STD_INPUT_HANDLE);
+		pipe = !GetConsoleMode(hstdin, &dw);
+		if (!pipe)
+		{
+			SetConsoleMode(hstdin, dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT));
+			FlushConsoleInputBuffer(hstdin);
+		}
+		else
+		{
+			setvbuf(stdin, NULL, _IONBF, 0);
+			setvbuf(stdout, NULL, _IONBF, 0);
+		}
+	}
 	if (pipe)
 		PeekNamedPipe(hstdin, 0, 0, 0, &dw, 0);
 	else
@@ -635,7 +574,6 @@ bool CheckUp() {
 
 int main() {
 	cout << NAME << " " << VERSION << endl;
-	InitImput();
 	InitEval();
 	InitSearch();
 	InitPosition();

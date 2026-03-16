@@ -44,8 +44,10 @@ int ValueToCp(Value v) {
 	return (v * 100) / materialMax[PAWN];
 }
 
-inline static Piece GetCapturedPiece(Move m) {
-	return pos.Board(m.To());
+inline static PieceType GetCapturedPT(Move m) {
+	if (m.Flags() == EN_PASSANT)
+		return PAWN;
+	return TypeOf(pos.Board(m.To()));
 }
 
 inline static Piece GetMovingPiece(Move m) {
@@ -99,8 +101,7 @@ static Value ScoreToValue(Score score) {
 
 void InitEval() {
 	int mg, eg;
-	int v, d;
-	srand(time(NULL));
+	srand((U32)time(NULL));
 	int elo = options.elo;
 	if (elo < options.eloMin)
 		elo = options.eloMin;
@@ -219,9 +220,8 @@ void InitEval() {
 }
 
 static Bitboard GetLeastValuablePiece(Bitboard attadef, Color bySide, Piece& piece) {
-	int maskColor = bySide << 3;
-	for (int n = PAWN; n <= KING; n++) {
-		piece = Piece(maskColor | n);
+	for (PieceType pt = PAWN; pt <= KING; ++pt) {
+		piece = MakePiece(bySide, pt);
 		const Bitboard subset = attadef & pos.bitboard_of(piece);
 		if (subset)
 			return subset & -subset;    // single bit
@@ -229,12 +229,14 @@ static Bitboard GetLeastValuablePiece(Bitboard attadef, Color bySide, Piece& pie
 	return 0;    // empty set
 }
 
+Value materialSee[PT_NB] = { Value(100), Value(320), Value(330), Value(500), Value(900), Value(10000) };
+
 static Value See(Move m) {
-	//if (!m.IsCapture())return VALUE_ZERO;
+	if (!m.IsCapture())return VALUE_ZERO;
 	Square sqFrom = m.From();
 	Square sqTo = m.To();
 	MoveFlags flags = m.Flags();
-	Piece  capturedPiece = GetCapturedPiece(m);
+	PieceType  capturedPT = GetCapturedPT(m);
 	Piece  capturingPiece = GetMovingPiece(m);
 	Color attacker = ColorOf(capturingPiece);
 	Value gain[32]{};
@@ -253,7 +255,8 @@ static Value See(Move m) {
 		| (PSEUDO_LEGAL_ATTACKS[KING][sqTo] & (pos.bitboard_of(WHITE_KING) | pos.bitboard_of(BLACK_KING)));
 	Bitboard attadef = (fixed | ((GetBishopAttacks(sqTo, occ) & bishopsQueens) | (GetRookAttacks(sqTo, occ) & rooksQueens)));
 	if (m.IsCapture())
-		gain[d] = materialMax[TypeOf(capturedPiece)];
+		gain[d] = materialMax[capturedPT];
+		//gain[d] = materialSee[TypeOf(capturedPiece)];
 	else
 		gain[d] = VALUE_ZERO;
 	do {
@@ -418,7 +421,7 @@ static Score Eval(Position& pos, SEvalSide& esUs, SEvalSide& esEn) {
 }
 
 static string ShowScore(string result) {
-	int len = 16 - result.length();
+	int len = 16 - (int)result.length();
 	if (len < 0)
 		len = 0;
 	result.append(len, ' ');
@@ -467,7 +470,7 @@ Value Trace(Position& pos) {
 		std::cout << "moves:" << endl;
 		for (int n = 0; n < picker.count; n++) {
 			PickerE pe = picker.Pick(n);
-			printf(" %s %4d %4d \n",pe.move.ToUci(), (int)pe.value, (int)See(pe.move));
+			printf("%4d %s %4d %4d \n", (n + 1), pe.move.ToUci().c_str(), (int)pe.value, (int)See(pe.move));
 		}
 		pos.PrintBoard();
 		PrintTerm("Pawn", PAWN);

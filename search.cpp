@@ -171,7 +171,6 @@ Value SearchQuiesce(Position& pos, Stack* ss, Value alpha, Value beta) {
 	Value staticEval = ss->staticEval = Eval();
 	Value value = staticEval;
 	Value bestValue = -VALUE_INFINITE;
-	//Value bestValue = staticEval;
 	Move bestMove = MOVE_NONE;
 	if (value >= beta)
 		return beta;
@@ -227,16 +226,15 @@ Value SearchQuiesce(Position& pos, Stack* ss, Value alpha, Value beta) {
 		PickerE pe = picker.Pick(n);
 		Move m = pe.move;
 		if ((bestMove != MOVE_NONE) && (pe.value < 0))break;
-		//if (pe.value < 0)break;
 		pos.MakeMove(m);
 		value = -SearchQuiesce<nt>(pos, ss + 1, -beta, -alpha);
 		pos.UnmakeMove(m);
 		if (value > bestValue) {
 			bestValue = value;
 			bestMove = m;
-			if (value > alpha)
+			if (alpha < value)
 				alpha = value;
-			if (value >= beta)
+			if (alpha >= beta)
 				break;
 		}
 	}
@@ -299,41 +297,37 @@ static Value SearchAlpha(Position& pos, Stack* ss, Depth depth, Value alpha, Val
 			if ((ttE->bound == BOUND_EXACT) ||
 				(ttE->bound == BOUND_UPPER && staticEval < ttE->score) ||
 				(ttE->bound == BOUND_LOWER && staticEval > ttE->score))
-				staticEval = ttE->GetValue();
+				staticEval = ttValue;
 
 		}
 	}else
-	//if (!picker.best)
 		depth -= Depth(depth > 3);
 	picker.SetBest(ss->killers[0]);
 	picker.SetBest(ss->killers[1]);
 	int td = depth + ss->ply;
 
 	bool improving = staticEval >= (ss - 2)->staticEval || (ss - 2)->staticEval == VALUE_NONE;
-	//bool improving = ss->staticEval >= (ss - 2)->staticEval || ss->staticEval == VALUE_NONE || (ss - 2)->staticEval == VALUE_NONE;
 
 	if (!inCheck) {
 
 		//razoring
-		if (depth < 2 * ONE_PLY
+		if (depth < 2
 			&& alpha - staticEval >(RAZOR_MARGIN * depth) / td)
 			return SearchQuiesce<nt>(pos, ss, alpha, beta);
 
 		//futility pruning
-		if (depth < 7 * ONE_PLY
+		if (depth < 7
 			&& staticEval - beta >(FUTILITY_MARGIN * depth) / td
 			&& staticEval - futility_margin(depth, improving) >= beta
 			&& staticEval < VALUE_KNOWN_WIN) // Do not return unproven wins
 			return staticEval;
 
-		//eval pruning
+		//Reverse futility pruning
 		if (depth < 3
 			&& !pvNode
-			&& abs(beta - 1) > VALUE_MATED_IN)
-		{
-			Value eval = staticEval - RFP_MARGIN * depth;
-			if (eval >= beta)
-				return eval;
+			&& abs(beta - 1) > VALUE_MATED_IN){
+			if (staticEval - RFP_MARGIN * depth >= beta)
+				return staticEval;
 		}
 
 		//null move pruning

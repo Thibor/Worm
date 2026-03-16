@@ -47,7 +47,7 @@ enum Piece : int {
 	PIECE_NB = 15
 };
 
-enum PieceType : int { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PT_NB };
+enum PieceType : int { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,PT_NB };
 
 enum File : int { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NB };
 
@@ -770,8 +770,8 @@ struct SearchInfo {
 	bool ponder = false;
 	int multiPV = 1;
 	int depthLimit = DEPTH_MAX;
-	S64 timeStart = 0;
-	S64 timeLimit = 0;
+	U64 timeStart = 0;
+	U64 timeLimit = 0;
 	U64 nodes = 0;
 	U64 nodesLimit = 0;
 	vector<Move> rootMoves;
@@ -789,10 +789,8 @@ U64 GetTimeMs();
 void InitSearch();
 void SplitInt(const std::string& txt, std::vector<int>& vInt, char ch);
 void SplitString(const std::string& txt, std::vector<std::string>& vStr, char ch);
-string thousandSeparator(uint64_t n);
 string Trim(const string& s);
 string StrToLower(std::string s);
-int InitImput();
 void PrintSummary(U64 time, U64 nodes);
 void ResetInfo();
 void SearchIteratively();

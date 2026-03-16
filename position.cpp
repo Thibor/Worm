@@ -32,9 +32,9 @@ void Position::PrintBoard() const {
 	}
 	cout << s << endl;
 	cout << t << endl;
-	cout << "FEN : " << GetFen() << endl;
-	cout << "Hash: 0x" << std::hex << hash << std::dec << endl;
 	cout << "Side: " << (color == WHITE ? "white" : "black") << endl;
+	cout << "Hash: 0x" << std::hex << hash << std::dec << endl;
+	cout << "FEN : " << GetFen() << endl;
 }
 
 //Adds, to the move pointer all moves of the form (from, s), where s is a square in the bitboard to
@@ -333,15 +333,16 @@ void Position::SetFen(const std::string& fen) {
 			PutPiece(Piece(PIECE_STR.find(ch)), Square(square++));
 	}
 
-	std::istringstream ss(fen.substr(fen.find(' ')));
-	unsigned char token;
+	string word;
+	std::stringstream ss(fen.substr(fen.find(' ')));
+	ss >> word;
+	color = word == "w" ? WHITE : BLACK;
 
-	ss >> token;
-	color = token == 'w' ? WHITE : BLACK;
+	ss >> word;
 
 	history[historyIndex].entry = ALL_CASTLING_MASK;
-	while (ss >> token && !isspace(token)) {
-		switch (token) {
+	for(char c :word)
+		switch (c) {
 		case 'K':
 			history[historyIndex].entry &= ~WHITE_OO_MASK;
 			break;
@@ -355,6 +356,11 @@ void Position::SetFen(const std::string& fen) {
 			history[historyIndex].entry &= ~BLACK_OOO_MASK;
 			break;
 		}
+
+	ss >> word;
+
+	if (word != "-") {
+		history[historyIndex].epsq =  Square((word[0] - 'a') + 8 * (word[1] - '1'));
 	}
 }
 

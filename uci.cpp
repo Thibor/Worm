@@ -2,7 +2,7 @@
 
 //Get index of key
 static int UciIndex(vector<string> list, string command) {
-	for (size_t n = 0; n < list.size() - 1; n++)
+	for (int n = 0; n < list.size() - 1; n++)
 		if (list[n] == command)
 			return n;
 	return -1;
@@ -104,7 +104,7 @@ static void PrintSummary(U64 time, U64 nodes) {
 	U64 nps = (nodes * 1000) / time;
 	const char* units[] = { "", "k", "m", "g" };
 	int sn = ShrinkNumber(nps);
-	U64 p = pow(10, sn * 3);
+	U64 p = (U64)pow(10, sn * 3);
 	printf("-----------------------------\n");
 	printf("Time        : %llu\n", time);
 	printf("Nodes       : %llu\n", nodes);
@@ -337,8 +337,9 @@ void UciCommand(string str) {
 
 //main uci loop
 void UciLoop() {
-	//pos.SetFen("8/8/8/8/1q6/3k4/8/2K5 w - - 14 68");
-	//UciCommand("go depth 2");
+	//UciCommand("position startpos moves g1f3 d7d5 g2g3 g8f6 f1g2 g7g6 e2e3 b8c6 d2d4 c8f5 f3e5 d8d6 c2c4 c6e5 d4e5 d6e5 f2f4 e5d6 c4d5 a7a5 b1c3 d6b4 d1e2 h7h5 e3e4 f5g4 e2d2 e8c8 e4e5 f6d7 a2a3 b4b6 b2b4 a5b4 a3b4 b6b4 a1a8 d7b8 c1a3 b4b6 c3a4 b6b1 e1f2 b1b5 a4c3 b5b6 d2e3 b6e3 f2e3 h8h7 h1c1 g4d7 c1d1 e7e6 a3f8 d8f8 c3e4 d7b5 d5e6 f7e6 e4c5 c7c6 c5e6 f8g8 g2h3 h7h8 a8a7 b5a6 e6c5 c8c7 d1b1 g8c8 c5a6 b8a6 a7b7 c7d8 b1d1 d8e8 h3d7 e8f8 d7c8 a6c7 b7c7 f8e8 c8b7 h8h7 b7c6 h7d7 d1d7 e8f8");
+	//UciCommand("position fen 8/3k4/8/1K4Pp/8/8/8/8 w - h6 86 144");
+	//UciCommand("eval");
 	string line;
 	while (true) {
 		getline(cin, line);
